@@ -1,0 +1,4 @@
+node_modules
+.vscode
+components.d.ts
+auto-imports.d.ts

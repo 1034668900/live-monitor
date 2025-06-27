@@ -1,0 +1,112 @@
+/* GitHub主题配色变量 */
+:root {
+  /* 基础颜色 */
+  --github-bg: #ffffff;
+  --github-bg-secondary: #f6f8fa;
+  --github-bg-tertiary: #eaeef2;
+  
+  /* 边框颜色 */
+  --github-border: #d1d9e0;
+  --github-border-muted: #d8dee4;
+  --github-border-subtle: #afb8c1;
+  --github-border-hover: #8c959f;
+  
+  /* 文字颜色 */
+  --github-text: #24292f;
+  --github-text-secondary: #656d76;
+  --github-text-muted: #8c959f;
+  --github-text-disabled: #afb8c1;
+  
+  /* 强调色 */
+  --github-accent-blue: #0969da;
+  --github-accent-blue-hover: #0860ca;
+  --github-accent-blue-active: #0550ae;
+  
+  --github-accent-green: #1a7f37;
+  --github-accent-green-hover: #116329;
+  --github-accent-green-active: #0d4f23;
+  
+  --github-accent-red: #cf222e;
+  --github-accent-red-hover: #a40e26;
+  --github-accent-red-active: #82071e;
+  
+  --github-accent-orange: #fb8500;
+  --github-accent-orange-hover: #e07400;
+  --github-accent-orange-active: #bc6100;
+  
+  --github-accent-purple: #8250df;
+  --github-accent-purple-hover: #6f42c1;
+  --github-accent-purple-active: #5a32a3;
+  
+  /* 阴影 */
+  --github-shadow: 0 1px 3px rgba(27, 31, 36, 0.12);
+  --github-shadow-medium: 0 3px 6px rgba(27, 31, 36, 0.15);
+  --github-shadow-large: 0 8px 24px rgba(140, 149, 159, 0.2);
+  --github-shadow-extra-large: 0 16px 32px rgba(27, 31, 36, 0.24);
+  
+  /* 圆角 */
+  --github-radius-small: 4px;
+  --github-radius-medium: 6px;
+  --github-radius-large: 8px;
+  --github-radius-extra-large: 12px;
+  
+  /* 间距 */
+  --github-spacing-xs: 4px;
+  --github-spacing-sm: 8px;
+  --github-spacing-md: 12px;
+  --github-spacing-lg: 16px;
+  --github-spacing-xl: 20px;
+  --github-spacing-xxl: 24px;
+  
+  /* 状态颜色 */
+  --github-success-bg: #dafbe1;
+  --github-success-text: #116329;
+  --github-success-border: #27d545;
+  
+  --github-warning-bg: #fff8c5;
+  --github-warning-text: #9a6700;
+  --github-warning-border: #ffdf5d;
+  
+  --github-danger-bg: #ffebe9;
+  --github-danger-text: #cf222e;
+  --github-danger-border: #ff8182;
+  
+  --github-info-bg: #ddf4ff;
+  --github-info-text: #0969da;
+  --github-info-border: #54aeff;
+}
+
+/* 深色主题（可选） */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --github-bg: #0d1117;
+    --github-bg-secondary: #161b22;
+    --github-bg-tertiary: #21262d;
+    
+    --github-border: #30363d;
+    --github-border-muted: #21262d;
+    --github-border-subtle: #484f58;
+    --github-border-hover: #6e7681;
+    
+    --github-text: #f0f6fc;
+    --github-text-secondary: #8b949e;
+    --github-text-muted: #6e7681;
+    --github-text-disabled: #484f58;
+    
+    --github-accent-blue: #58a6ff;
+    --github-accent-blue-hover: #79c0ff;
+    --github-accent-blue-active: #388bfd;
+    
+    --github-accent-green: #3fb950;
+    --github-accent-green-hover: #56d364;
+    --github-accent-green-active: #2ea043;
+    
+    --github-accent-red: #f85149;
+    --github-accent-red-hover: #ff6166;
+    --github-accent-red-active: #da3633;
+    
+    --github-accent-orange: #ff8700;
+    --github-accent-orange-hover: #ffa657;
+    --github-accent-orange-active: #db6d28;
+  }
+} 

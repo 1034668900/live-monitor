@@ -1,0 +1,1 @@
+export { TrtcPlayer } from './TrtcPlayer'; 
