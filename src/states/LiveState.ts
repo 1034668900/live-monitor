@@ -2,11 +2,7 @@ import { ref, watch } from 'vue';
 import { type LiveRoomInfo } from '../types/room';
 import { concurrentMonitors } from '../config';
 import { getLiveList, destroyRoom } from '../api';
-import {
-  usePlayerManager,
-  PlayerEvent,
-  type PlayerEventData,
-} from '../manager';
+import { usePlayerManager, PlayerEvent, type PlayerEventData } from '../manager';
 
 // 使用新的播放器管理器
 const playerManager = usePlayerManager();
@@ -48,15 +44,10 @@ const initializePlayers = async () => {
           details: diagAccount,
         });
       } catch (diagError) {
-        console.error(
-          `${LOG_TAG} Diagnosis - Account creation failed:`,
-          diagError
-        );
+        console.error(`${LOG_TAG} Diagnosis - Account creation failed:`, diagError);
       }
     } else {
-      console.log(
-        `${LOG_TAG} Successfully created ${playerIds.value.length} players`
-      );
+      console.log(`${LOG_TAG} Successfully created ${playerIds.value.length} players`);
     }
 
     // 设置播放器事件监听
@@ -77,7 +68,7 @@ const createPlayers = async () => {
 
 // 设置播放器事件监听
 const setupPlayerEventListeners = () => {
-  playerIds.value.forEach((playerId) => {
+  playerIds.value.forEach(playerId => {
     const player = playerManager.getPlayer(playerId);
     if (!player) return;
 
@@ -126,9 +117,7 @@ const startMonitor = async () => {
     const roomsToMonitor = liveList.value.slice(start, end);
 
     console.log(
-      `${LOG_TAG} Starting monitor with range ${start}-${end - 1}, rooms: ${
-        roomsToMonitor.length
-      }`
+      `${LOG_TAG} Starting monitor with range ${start}-${end - 1}, rooms: ${roomsToMonitor.length}`
     );
 
     // 确保有足够的播放器
@@ -142,7 +131,7 @@ const startMonitor = async () => {
     // 先断开所有当前连接
     if (currentMonitorRooms.value.length > 0) {
       await stopMonitor();
-      await new Promise((resolve) => setTimeout(resolve, 200));
+      await new Promise(resolve => setTimeout(resolve, 200));
     }
 
     // 准备房间连接配置
@@ -155,9 +144,7 @@ const startMonitor = async () => {
         // 验证容器是否存在
         const containerElement = document.getElementById(viewElementId);
         if (!containerElement) {
-          console.warn(
-            `${LOG_TAG} Container ${viewElementId} not found for room ${room.RoomId}`
-          );
+          console.warn(`${LOG_TAG} Container ${viewElementId} not found for room ${room.RoomId}`);
           return null;
         }
 
@@ -195,9 +182,7 @@ const startMonitor = async () => {
 
           // 只有连接成功的房间才加入监控列表
           successfulConnections.push(connection.roomConfig.roomId);
-          console.log(
-            `${LOG_TAG} Successfully connected to room: ${connection.roomConfig.roomId}`
-          );
+          console.log(`${LOG_TAG} Successfully connected to room: ${connection.roomConfig.roomId}`);
         } catch (error) {
           console.error(
             `${LOG_TAG} Failed to connect room ${connection.roomConfig.roomId}:`,
@@ -239,8 +224,8 @@ const stopMonitor = async () => {
 
   try {
     // 先隐藏所有占位符
-    currentMonitorRooms.value.forEach((roomId) => {
-      const room = liveList.value.find((r) => r.RoomId === roomId);
+    currentMonitorRooms.value.forEach(roomId => {
+      const room = liveList.value.find(r => r.RoomId === roomId);
       if (room) {
         room.shouldShowPlaceholder = false;
       }
@@ -286,14 +271,10 @@ const monitorNextGroup = async () => {
   if (nextStartIndex + concurrentMonitors > totalLives) {
     const endIndex = totalLives;
     const newStartIndex = Math.max(0, endIndex - concurrentMonitors);
-    console.log(
-      `${LOG_TAG} Next group boundary: ${monitorStartIndex.value} -> ${newStartIndex}`
-    );
+    console.log(`${LOG_TAG} Next group boundary: ${monitorStartIndex.value} -> ${newStartIndex}`);
     monitorStartIndex.value = newStartIndex;
   } else {
-    console.log(
-      `${LOG_TAG} Next group normal: ${monitorStartIndex.value} -> ${nextStartIndex}`
-    );
+    console.log(`${LOG_TAG} Next group normal: ${monitorStartIndex.value} -> ${nextStartIndex}`);
     monitorStartIndex.value = nextStartIndex;
   }
 };
@@ -310,14 +291,10 @@ const monitorPreviousGroup = async () => {
   const prevStartIndex = monitorStartIndex.value - concurrentMonitors;
 
   if (prevStartIndex < 0) {
-    console.log(
-      `${LOG_TAG} Prev group boundary: ${monitorStartIndex.value} -> 0`
-    );
+    console.log(`${LOG_TAG} Prev group boundary: ${monitorStartIndex.value} -> 0`);
     monitorStartIndex.value = 0;
   } else {
-    console.log(
-      `${LOG_TAG} Prev group normal: ${monitorStartIndex.value} -> ${prevStartIndex}`
-    );
+    console.log(`${LOG_TAG} Prev group normal: ${monitorStartIndex.value} -> ${prevStartIndex}`);
     monitorStartIndex.value = prevStartIndex;
   }
 };
@@ -384,7 +361,7 @@ const fetchLiveList = async () => {
         ...room,
         shouldShowPlaceholder: false, // 默认不显示占位符
       }));
-      
+
       liveList.value.push(...newRooms);
       cursor = response.data.Next || cursor;
 
@@ -405,9 +382,7 @@ const fetchLiveList = async () => {
 };
 
 // 切换监控
-const switchMonitor = async (
-  direction: 'prev' | 'next' | 'refresh' = 'next'
-) => {
+const switchMonitor = async (direction: 'prev' | 'next' | 'refresh' = 'next') => {
   if (direction === 'refresh') {
     await startMonitor();
   } else if (direction === 'next') {
@@ -420,13 +395,13 @@ const switchMonitor = async (
 // 更新房间监控状态
 const updateRoomMonitorStatus = () => {
   // 清除所有房间的监控状态
-  liveList.value.forEach((room) => {
+  liveList.value.forEach(room => {
     room.isBeingMonitored = false;
   });
 
   // 设置当前监控的房间状态
-  currentMonitorRooms.value.forEach((roomId) => {
-    const room = liveList.value.find((r) => r.RoomId === roomId);
+  currentMonitorRooms.value.forEach(roomId => {
+    const room = liveList.value.find(r => r.RoomId === roomId);
     if (room) {
       room.isBeingMonitored = true;
     }
@@ -439,23 +414,19 @@ const updateRoomMonitorStatus = () => {
 
 // 显示房间占位符
 const showRoomPlaceholder = (roomId: string) => {
-  if (currentMonitorRooms.value.includes(roomId)) {
-    const room = liveList.value.find((r) => r.RoomId === roomId);
-    if (room) {
-      room.shouldShowPlaceholder = true;
-      console.log(`${LOG_TAG} Placeholder shown for monitor room: ${roomId}`);
-    }
+  const room = liveList.value.find(r => r.RoomId === roomId);
+  if (room) {
+    room.shouldShowPlaceholder = true;
+    console.log(`${LOG_TAG} Placeholder shown for monitor room: ${roomId}`);
   }
 };
 
 // 隐藏房间占位符
 const hideRoomPlaceholder = (roomId: string) => {
-  if (currentMonitorRooms.value.includes(roomId)) {
-    const room = liveList.value.find((r) => r.RoomId === roomId);
-    if (room) {
-      room.shouldShowPlaceholder = false;
-      console.log(`${LOG_TAG} Placeholder hidden for monitor room: ${roomId}`);
-    }
+  const room = liveList.value.find(r => r.RoomId === roomId);
+  if (room) {
+    room.shouldShowPlaceholder = false;
+    console.log(`${LOG_TAG} Placeholder hidden for monitor room: ${roomId}`);
   }
 };
 
