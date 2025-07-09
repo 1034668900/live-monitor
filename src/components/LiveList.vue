@@ -8,7 +8,9 @@
           :src="live.CoverURL || defaultCoverUrl"
           :alt="`直播间 ${live.RoomId} 封面`"
           @error="handleImageError"
-          :class="{ hidden: live.isBeingMonitored }"
+          :class="{ 
+            hidden: live.isBeingMonitored && (live.isStreaming || live.shouldShowPlaceholder) 
+          }"
         />
         <NoStreamPlaceholder
           :key="`placeholder-${live.RoomId}`"
