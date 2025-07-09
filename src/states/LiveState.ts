@@ -49,9 +49,6 @@ const initializePlayers = async () => {
     } else {
       console.log(`${LOG_TAG} Successfully created ${playerIds.value.length} players`);
     }
-
-    // 设置播放器事件监听
-    setupPlayerEventListeners();
   } catch (error) {
     console.error(`${LOG_TAG} Player initialization failed:`, error);
     throw error;
@@ -68,28 +65,48 @@ const createPlayers = async () => {
 
 // 设置播放器事件监听
 const setupPlayerEventListeners = () => {
+  console.log(`${LOG_TAG} Setting up player event listeners for ${playerIds.value.length} players`);
+
   playerIds.value.forEach(playerId => {
     const player = playerManager.getPlayer(playerId);
     if (!player) return;
 
-    // 监听播放事件，隐藏占位符
+    // 监听播放事件，隐藏占位符（显示视频）
     player.on(PlayerEvent.PLAYING, (data: PlayerEventData) => {
+      console.log(`${LOG_TAG} PLAYING event received:`, {
+        roomId: data.roomId,
+        currentMonitorRooms: currentMonitorRooms.value,
+        isInMonitorList: currentMonitorRooms.value.includes(data.roomId || ''),
+      });
+
       if (data.roomId) {
-        hideRoomPlaceholder(data.roomId);
+        hideRoomPlaceholder(data.roomId); // 有视频流，隐藏占位符，显示视频
       }
     });
 
-    // 监听停止事件，显示占位符
+    // 监听停止事件，显示封面（没有视频流）
     player.on(PlayerEvent.STOPPED, (data: PlayerEventData) => {
+      console.log(`${LOG_TAG} STOPPED event received:`, {
+        roomId: data.roomId,
+        currentMonitorRooms: currentMonitorRooms.value,
+        isInMonitorList: currentMonitorRooms.value.includes(data.roomId || ''),
+      });
+
       if (data.roomId) {
-        showRoomPlaceholder(data.roomId);
+        showRoomCover(data.roomId); // 停止播放，显示封面
       }
     });
 
-    // 监听错误事件，显示占位符
+    // 监听错误事件，显示占位符（等待重连）
     player.on(PlayerEvent.ERROR, (data: PlayerEventData) => {
+      console.log(`${LOG_TAG} ERROR event received:`, {
+        roomId: data.roomId,
+        currentMonitorRooms: currentMonitorRooms.value,
+        isInMonitorList: currentMonitorRooms.value.includes(data.roomId || ''),
+      });
+
       if (data.roomId) {
-        showRoomPlaceholder(data.roomId);
+        showRoomPlaceholder(data.roomId); // 错误时显示占位符
       }
     });
 
@@ -103,6 +120,8 @@ const setupPlayerEventListeners = () => {
       console.log(`${LOG_TAG} Player disconnected from room: ${data.roomId}`);
     });
   });
+
+  console.log(`${LOG_TAG} Player event listeners setup completed`);
 };
 
 // 开始监控当前范围的直播间
@@ -176,7 +195,7 @@ const startMonitor = async () => {
           // 先断开旧连接
           await player.disconnect();
           // 更新视图容器
-          await player.updateViewElement(connection.viewElementId);
+          player.updateViewElement(connection.viewElementId);
           // 连接新房间
           await player.connect(connection.roomConfig);
 
@@ -198,11 +217,15 @@ const startMonitor = async () => {
     // 更新直播间的监控状态 - 基于实际成功连接的房间
     updateRoomMonitorStatus();
 
+    // 清理旧的事件监听器，然后设置新的事件监听器
+    cleanupEventListeners();
+    setupPlayerEventListeners();
+
     console.log(
       `${LOG_TAG} Monitor completed: ${successfulConnections.length}/${connections.length} rooms connected successfully`
     );
 
-    // 显示正在监控的房间的占位符（直到实际播放开始）
+    // 显示正在监控的房间的占位符（等待视频流开始）
     for (const roomId of successfulConnections) {
       showRoomPlaceholder(roomId);
     }
@@ -223,13 +246,18 @@ const stopMonitor = async () => {
   }
 
   try {
-    // 先隐藏所有占位符
+    console.log(`${LOG_TAG} Stopping monitor for rooms:`, currentMonitorRooms.value);
+
+    // 先隐藏所有占位符并重置状态
     currentMonitorRooms.value.forEach(roomId => {
       const room = liveList.value.find(r => r.RoomId === roomId);
       if (room) {
         room.shouldShowPlaceholder = false;
+        room.isStreaming = false; // 重置视频流状态
       }
     });
+
+    cleanupEventListeners();
 
     await playerManager.disconnectFromRooms(
       playerIds.value.slice(0, currentMonitorRooms.value.length)
@@ -360,6 +388,7 @@ const fetchLiveList = async () => {
       const newRooms = response.data.RoomList.map((room: any) => ({
         ...room,
         shouldShowPlaceholder: false, // 默认不显示占位符
+        isStreaming: false, // 默认没有视频流
       }));
 
       liveList.value.push(...newRooms);
@@ -412,21 +441,49 @@ const updateRoomMonitorStatus = () => {
   );
 };
 
-// 显示房间占位符
+// 显示房间占位符（等待视频流）
 const showRoomPlaceholder = (roomId: string) => {
+  // 只有监控中的房间才显示占位符
+  if (!currentMonitorRooms.value.includes(roomId)) {
+    console.log(`${LOG_TAG} Room ${roomId} not in monitor list, skipping placeholder show`);
+    return;
+  }
+
   const room = liveList.value.find(r => r.RoomId === roomId);
   if (room) {
     room.shouldShowPlaceholder = true;
-    console.log(`${LOG_TAG} Placeholder shown for monitor room: ${roomId}`);
+    room.isStreaming = false; // 标记没有视频流
+    console.log(`${LOG_TAG} Placeholder shown for monitor room: ${roomId} (waiting for stream)`);
   }
 };
 
-// 隐藏房间占位符
+// 隐藏房间占位符（有视频流或显示封面）
 const hideRoomPlaceholder = (roomId: string) => {
+  // 只有监控中的房间才隐藏占位符
+  if (!currentMonitorRooms.value.includes(roomId)) {
+    console.log(`${LOG_TAG} Room ${roomId} not in monitor list, skipping placeholder hide`);
+    return;
+  }
+
   const room = liveList.value.find(r => r.RoomId === roomId);
   if (room) {
     room.shouldShowPlaceholder = false;
-    console.log(`${LOG_TAG} Placeholder hidden for monitor room: ${roomId}`);
+    room.isStreaming = true; // 标记有视频流
+    console.log(`${LOG_TAG} Placeholder hidden for monitor room: ${roomId} (showing video)`);
+  }
+};
+
+// 停止播放时显示封面
+const showRoomCover = (roomId: string) => {
+  // 只有监控中的房间才处理
+  if (!currentMonitorRooms.value.includes(roomId)) {
+    return;
+  }
+
+  const room = liveList.value.find(r => r.RoomId === roomId);
+  if (room) {
+    room.shouldShowPlaceholder = false;
+    room.isStreaming = false; // 标记没有视频流
   }
 };
 
@@ -446,6 +503,12 @@ const cleanup = async () => {
   } catch (error) {
     console.error(`${LOG_TAG} Cleanup failed:`, error);
   }
+};
+
+// 清理事件监听器
+const cleanupEventListeners = () => {
+  console.log(`${LOG_TAG} Cleaning up player event listeners...`);
+  console.log(`${LOG_TAG} Event listeners will be re-setup on next monitor start`);
 };
 
 // 导出状态和方法

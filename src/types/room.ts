@@ -13,6 +13,7 @@ export interface LiveRoomInfo {
   isBeingMonitored?: boolean; // 是否正在被监控
   isMonitoring?: boolean; // 是否正在监控中
   shouldShowPlaceholder?: boolean; // 是否应该显示占位符
+  isStreaming?: boolean; // 是否有视频流正在播放
 }
 
 export interface BasicUserInfo {
