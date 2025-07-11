@@ -200,7 +200,11 @@ export class TrtcPlayer extends BasePlayer {
     this.log("User video available", { streamUrl, isAvailable });
 
     if (isAvailable) {
-      this.currentStreamUrl = streamUrl;
+      if (this.currentStreamUrl) {
+        this.currentStreamUrl = streamUrl.startsWith('livekit_') ? streamUrl : this.currentStreamUrl;
+      } else {
+        this.currentStreamUrl = streamUrl
+      }
       this.updateState({
         metadata: {
           ...this.state.metadata,
